@@ -1,0 +1,41 @@
+@{
+    string CurrentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    string PageTitle = ViewData["Title"] as string ?? "Dashboard";
+
+    string Section = CurrentController switch
+    {
+        "Dashboard" or "Home" => "",
+        "Owners" or "Weapons" or "Licenses" or "Transfers" => "Registry",
+        "Approvals" or "Search" => "Workflow",
+        "Reports" or "Notifications" or "AuditLogs" => "Insights",
+        "Users" or "Settings" => "Administration",
+        "Account" => "Account",
+        _ => ""
+    };
+}
+<header class="app-topbar">
+    <div class="d-flex align-items-center gap-2">
+        <button type="button" class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle navigation">
+            <i class="bi bi-list"></i>
+        </button>
+        <div>
+            @if (!string.IsNullOrEmpty(Section))
+            {
+                <div class="breadcrumb-trail">
+                    <span>@Section</span>
+                    <i class="bi bi-chevron-right" style="font-size: 0.65rem;"></i>
+                    <span class="crumb-current">@PageTitle</span>
+                </div>
+            }
+            <span class="page-title">@PageTitle</span>
+        </div>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+        <form asp-controller="Search" asp-action="Index" method="get" class="topbar-search d-none d-lg-block">
+            <i class="bi bi-search"></i>
+            <input type="text" name="q" class="form-control form-control-sm" placeholder="Search registrations, owners..." aria-label="Search" />
+        </form>
+        @await Component.InvokeAsync("NotificationBell")
+        <partial name="_UserMenu" />
+    </div>
+</header>

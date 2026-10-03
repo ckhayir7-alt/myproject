@@ -1,0 +1,11 @@
+@model WRMS.Web.Models.Shared.EmptyStateViewModel
+
+<div class="empty-state">
+    <div class="empty-icon"><i class="bi @Model.Icon"></i></div>
+    <div class="empty-title">@Model.Title</div>
+    <p class="empty-message">@Model.Message</p>
+    @if (!string.IsNullOrEmpty(Model.ActionText) && !string.IsNullOrEmpty(Model.ActionUrl))
+    {
+        <a href="@Model.ActionUrl" class="btn btn-outline-secondary btn-sm">@Model.ActionText</a>
+    }
+</div>

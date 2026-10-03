@@ -1,0 +1,56 @@
+@model WRMS.Web.Models.Owners.OwnerFormViewModel
+
+<input type="hidden" asp-for="Id" />
+
+<div class="form-section">
+    <div class="form-section-title"><i class="bi bi-person-badge text-muted"></i> Personal Information</div>
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label asp-for="FullName" class="form-label required-asterisk"></label>
+            <input asp-for="FullName" class="form-control" placeholder="e.g. Michael Anderson" />
+            <span asp-validation-for="FullName" class="text-danger small"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="NationalId" class="form-label required-asterisk"></label>
+            <input asp-for="NationalId" class="form-control" placeholder="National identification number" />
+            <span asp-validation-for="NationalId" class="text-danger small"></span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label asp-for="DateOfBirth" class="form-label required-asterisk"></label>
+            <input asp-for="DateOfBirth" type="date" class="form-control" />
+            <span asp-validation-for="DateOfBirth" class="text-danger small"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="Gender" class="form-label required-asterisk"></label>
+            <select asp-for="Gender" class="form-select" asp-items="Html.GetEnumSelectList<WRMS.Domain.Enums.Gender>()"></select>
+        </div>
+        <div class="col-md-4 mb-3 mb-md-0">
+            <label asp-for="PhoneNumber" class="form-label required-asterisk"></label>
+            <input asp-for="PhoneNumber" class="form-control" placeholder="+1-555-0100" />
+            <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+        </div>
+    </div>
+</div>
+
+<div class="form-section">
+    <div class="form-section-title"><i class="bi bi-geo-alt text-muted"></i> Contact &amp; Additional Details</div>
+    <div class="row">
+        <div class="col-md-8 mb-3">
+            <label asp-for="Address" class="form-label required-asterisk"></label>
+            <input asp-for="Address" class="form-control" placeholder="Street, city, region" />
+            <span asp-validation-for="Address" class="text-danger small"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="Occupation" class="form-label"></label>
+            <input asp-for="Occupation" class="form-control" />
+        </div>
+    </div>
+
+    <div class="mb-0">
+        <label asp-for="Notes" class="form-label"></label>
+        <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Optional internal notes"></textarea>
+    </div>
+</div>

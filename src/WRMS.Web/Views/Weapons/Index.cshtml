@@ -1,0 +1,73 @@
+@model List<WRMS.Application.DTOs.Weapons.WeaponListItemDto>
+@{
+    ViewData["Title"] = "Weapon Registrations";
+}
+
+<div class="page-header">
+    <div>
+        <div class="page-eyebrow">Registry</div>
+        <h1 class="page-heading">Weapon Registrations</h1>
+        <p class="page-subtitle">Manage and review all registered weapon records.</p>
+    </div>
+    <a asp-action="Create" class="btn btn-navy"><i class="bi bi-plus-circle me-1"></i> New Registration</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        @if (Model.Count == 0)
+        {
+            <partial name="_EmptyState" model="@(new WRMS.Web.Models.Shared.EmptyStateViewModel {
+                Icon = "bi-box-seam",
+                Title = "No weapon registrations yet",
+                Message = "Weapon registration records will appear here once submitted.",
+                ActionText = "New Registration",
+                ActionUrl = Url.Action("Create")
+            })" />
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle" id="weaponsTable">
+                    <thead>
+                        <tr>
+                            <th>Registration ID</th>
+                            <th>Category</th>
+                            <th>Manufacturer / Model</th>
+                            <th>Serial Number</th>
+                            <th>Owner</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var w in Model)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@w.RegistrationId</td>
+                                <td>@w.CategoryName</td>
+                                <td>@w.Manufacturer @w.Model</td>
+                                <td>@w.SerialNumber</td>
+                                <td><a asp-controller="Owners" asp-action="Details" asp-route-id="@w.OwnerId">@w.OwnerName</a></td>
+                                <td><span class="status-badge status-@w.Status.ToString().ToLowerInvariant()">@w.Status</span></td>
+                                <td class="text-end">
+                                    <a asp-action="Details" asp-route-id="@w.Id" class="btn btn-sm btn-outline-secondary" title="View"><i class="bi bi-eye"></i></a>
+                                    <a asp-action="Edit" asp-route-id="@w.Id" class="btn btn-sm btn-outline-secondary" title="Edit"><i class="bi bi-pencil"></i></a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            if ($('#weaponsTable').length) {
+                $('#weaponsTable').DataTable({ order: [[0, 'desc']], pageLength: 25 });
+            }
+        });
+    </script>
+}

@@ -1,0 +1,26 @@
+@model WRMS.Web.Models.Weapons.WeaponFormViewModel
+@{
+    ViewData["Title"] = "New Weapon Registration";
+}
+
+<div class="page-header">
+    <div>
+        <div class="page-eyebrow">Registry</div>
+        <h1 class="page-heading">New Weapon Registration</h1>
+        <p class="page-subtitle">Submit a new weapon for registration review. It will enter Pending Approval until reviewed by an officer.</p>
+    </div>
+</div>
+
+<div asp-validation-summary="ModelOnly" class="text-danger small mb-2"></div>
+
+<form asp-action="Create" method="post" novalidate>
+    <partial name="_Form" />
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-navy"><i class="bi bi-check2 me-1"></i> Submit Registration</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

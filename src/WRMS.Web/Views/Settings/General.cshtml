@@ -1,0 +1,31 @@
+@model List<WRMS.Application.DTOs.Settings.SystemSettingDto>
+@{
+    ViewData["Title"] = "System Configuration";
+}
+
+<div class="page-header">
+    <div>
+        <a asp-action="Index" class="page-eyebrow"><i class="bi bi-arrow-left me-1"></i>Back to Settings</a>
+        <h1 class="page-heading">System Configuration</h1>
+        <p class="page-subtitle">Agency details, license defaults, and alert thresholds.</p>
+    </div>
+</div>
+
+<div class="form-section">
+    <form asp-action="General" method="post">
+        @foreach (var setting in Model)
+        {
+            <div class="mb-3 row align-items-start">
+                <label class="col-md-3 col-form-label small fw-semibold">@setting.Key</label>
+                <div class="col-md-7">
+                    <input type="text" name="values[@setting.Key]" value="@setting.Value" class="form-control" />
+                    @if (!string.IsNullOrWhiteSpace(setting.Description))
+                    {
+                        <div class="form-text">@setting.Description</div>
+                    }
+                </div>
+            </div>
+        }
+        <button type="submit" class="btn btn-navy"><i class="bi bi-check2 me-1"></i> Save Settings</button>
+    </form>
+</div>

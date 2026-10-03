@@ -1,0 +1,41 @@
+@model WRMS.Web.Models.Licenses.RenewLicenseViewModel
+@{
+    ViewData["Title"] = "Renew License";
+}
+
+<div class="page-header">
+    <div>
+        <div class="page-eyebrow">Registry &bull; License</div>
+        <h1 class="page-heading">Renew License &mdash; @Model.LicenseNumber</h1>
+        <p class="page-subtitle">Current expiry date: @Model.CurrentExpiryDate.ToString("yyyy-MM-dd")</p>
+    </div>
+</div>
+
+<div asp-validation-summary="ModelOnly" class="text-danger small mb-2"></div>
+
+<form asp-action="Renew" method="post" novalidate>
+    <input type="hidden" asp-for="LicenseId" />
+    <input type="hidden" asp-for="LicenseNumber" />
+    <input type="hidden" asp-for="CurrentExpiryDate" />
+    <div class="form-section">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="NewExpiryDate" class="form-label required-asterisk"></label>
+                <input asp-for="NewExpiryDate" type="date" class="form-control" />
+                <span asp-validation-for="NewExpiryDate" class="text-danger small"></span>
+            </div>
+        </div>
+        <div class="mb-0">
+            <label asp-for="Notes" class="form-label"></label>
+            <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+        </div>
+    </div>
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-navy"><i class="bi bi-check2 me-1"></i> Renew</button>
+        <a asp-action="Details" asp-route-id="@Model.LicenseId" class="btn btn-outline-secondary">Cancel</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

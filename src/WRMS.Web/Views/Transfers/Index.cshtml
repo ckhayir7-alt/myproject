@@ -1,0 +1,69 @@
+@model List<WRMS.Application.DTOs.Transfers.TransferListItemDto>
+@{
+    ViewData["Title"] = "Ownership Transfers";
+}
+
+<div class="page-header">
+    <div>
+        <div class="page-eyebrow">Registry</div>
+        <h1 class="page-heading">Ownership Transfers</h1>
+        <p class="page-subtitle">Transfers are initiated from an actively registered weapon's detail page.</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        @if (Model.Count == 0)
+        {
+            <partial name="_EmptyState" model="@(new WRMS.Web.Models.Shared.EmptyStateViewModel {
+                Icon = "bi-arrow-left-right",
+                Title = "No ownership transfers yet",
+                Message = "Transfer requests will appear here once initiated from a weapon's detail page.",
+                ActionText = "View Weapon Registrations",
+                ActionUrl = Url.Action("Index", "Weapons")
+            })" />
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle" id="transfersTable">
+                    <thead>
+                        <tr>
+                            <th>Weapon</th>
+                            <th>Previous Owner</th>
+                            <th>New Owner</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var t in Model)
+                        {
+                            <tr>
+                                <td><a asp-controller="Weapons" asp-action="Details" asp-route-id="@t.WeaponId">@t.WeaponRegistrationId</a> &mdash; @t.WeaponDescription</td>
+                                <td>@t.PreviousOwnerName</td>
+                                <td>@t.NewOwnerName</td>
+                                <td>@t.TransferDate.ToString("yyyy-MM-dd")</td>
+                                <td><span class="status-badge status-@t.ApprovalStatus.ToString().ToLowerInvariant()">@t.ApprovalStatus</span></td>
+                                <td class="text-end">
+                                    <a asp-action="Details" asp-route-id="@t.Id" class="btn btn-sm btn-outline-secondary">View</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            if ($('#transfersTable').length) {
+                $('#transfersTable').DataTable({ order: [[3, 'desc']], pageLength: 25 });
+            }
+        });
+    </script>
+}

@@ -1,0 +1,96 @@
+@{
+    ViewData["Title"] = "Settings";
+}
+
+<div class="page-header">
+    <div>
+        <div class="page-eyebrow">Administration</div>
+        <h1 class="page-heading">Settings</h1>
+        <p class="page-subtitle">System configuration and administrative tools.</p>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6 col-lg-3">
+        <a asp-controller="Users" asp-action="Index" class="card-link">
+            <div class="card h-100">
+                <div class="card-body d-flex gap-3 align-items-start">
+                    <div class="stat-icon accent-info"><i class="bi bi-people"></i></div>
+                    <div>
+                        <div class="fw-semibold text-dark">User &amp; Role Management</div>
+                        <div class="small text-muted">Manage accounts and role assignments.</div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <a asp-action="Categories" class="card-link">
+            <div class="card h-100">
+                <div class="card-body d-flex gap-3 align-items-start">
+                    <div class="stat-icon accent-navy"><i class="bi bi-tags"></i></div>
+                    <div>
+                        <div class="fw-semibold text-dark">Weapon Categories</div>
+                        <div class="small text-muted">Configure the categories available for registration.</div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <a asp-action="General" class="card-link">
+            <div class="card h-100">
+                <div class="card-body d-flex gap-3 align-items-start">
+                    <div class="stat-icon accent-warning"><i class="bi bi-gear"></i></div>
+                    <div>
+                        <div class="fw-semibold text-dark">System Configuration</div>
+                        <div class="small text-muted">Agency details, license defaults, and alert thresholds.</div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <a asp-action="DataManagement" class="card-link">
+            <div class="card h-100">
+                <div class="card-body d-flex gap-3 align-items-start">
+                    <div class="stat-icon accent-success"><i class="bi bi-database"></i></div>
+                    <div>
+                        <div class="fw-semibold text-dark">Backup &amp; Data Management</div>
+                        <div class="small text-muted">Export a full data snapshot for archival purposes.</div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">Registration &amp; License Statuses (Reference)</div>
+    <div class="card-body small">
+        <p class="text-muted">These statuses are fixed by system design to guarantee consistent workflow behavior and cannot be renamed or removed.</p>
+        <div class="row">
+            <div class="col-md-6">
+                <strong class="d-block mb-2">Weapon Registration Statuses</strong>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="status-badge status-pending">Pending Approval</span>
+                    <span class="status-badge status-active">Active</span>
+                    <span class="status-badge status-expired">Expired</span>
+                    <span class="status-badge status-suspended">Suspended</span>
+                    <span class="status-badge status-revoked">Revoked</span>
+                    <span class="status-badge status-suspended">Rejected</span>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <strong class="d-block mb-2">License Statuses</strong>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="status-badge status-pending">Pending Approval</span>
+                    <span class="status-badge status-active">Active</span>
+                    <span class="status-badge status-expired">Expired</span>
+                    <span class="status-badge status-suspended">Suspended</span>
+                    <span class="status-badge status-revoked">Revoked</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

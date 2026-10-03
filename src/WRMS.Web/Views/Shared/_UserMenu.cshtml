@@ -1,0 +1,54 @@
+@if (User.Identity?.IsAuthenticated == true)
+{
+    var fullName = User.FindFirst("FullName")?.Value ?? User.Identity!.Name ?? "Account";
+    var initials = string.Concat(fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+        .Take(2)
+        .Select(p => char.ToUpperInvariant(p[0])));
+    if (string.IsNullOrEmpty(initials))
+    {
+        initials = "U";
+    }
+    var role = User.IsInRole("Admin") ? "Administrator"
+        : User.IsInRole("Officer") ? "Officer"
+        : User.IsInRole("AuthorizedStaff") ? "Authorized Staff"
+        : "User";
+    var profilePictureVersion = User.FindFirst("ProfilePicture")?.Value;
+    var hasProfilePicture = !string.IsNullOrEmpty(profilePictureVersion);
+
+    <div class="dropdown">
+        <button class="btn user-menu-btn d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            @if (hasProfilePicture)
+            {
+                <img src="@Url.Action("ProfilePicture", "Account")?v=@profilePictureVersion" alt="" class="user-avatar-img" />
+            }
+            else
+            {
+                <div class="user-avatar">@initials</div>
+            }
+            <div class="d-none d-md-block text-start">
+                <div class="user-menu-name">@fullName</div>
+                <div class="user-menu-role">@role</div>
+            </div>
+            <i class="bi bi-chevron-down small text-muted d-none d-md-inline"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+            <li class="px-2 py-1">
+                <div class="fw-semibold small">@fullName</div>
+                <div class="text-muted" style="font-size:0.75rem;">@role</div>
+            </li>
+            <li><hr class="dropdown-divider" /></li>
+            <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile"><i class="bi bi-person-circle me-2"></i>My Profile</a></li>
+            <li><a class="dropdown-item" asp-controller="Account" asp-action="ChangePassword"><i class="bi bi-key me-2"></i>Change Password</a></li>
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+                <form asp-controller="Account" asp-action="Logout" method="post">
+                    <button type="submit" class="dropdown-item text-danger"><i class="bi bi-box-arrow-right me-2"></i>Logout</button>
+                </form>
+            </li>
+        </ul>
+    </div>
+}
+else
+{
+    <a asp-controller="Account" asp-action="Login" class="btn btn-navy btn-sm">Sign In</a>
+}

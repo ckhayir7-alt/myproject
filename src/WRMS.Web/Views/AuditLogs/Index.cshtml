@@ -1,0 +1,118 @@
+@model List<WRMS.Application.DTOs.Audit.AuditLogItemDto>
+@{
+    ViewData["Title"] = "Audit Logs";
+    var entityTypes = ViewData["EntityTypes"] as List<string> ?? new List<string>();
+
+    string BadgeFor(WRMS.Domain.Enums.AuditAction action) => action switch
+    {
+        WRMS.Domain.Enums.AuditAction.Create or WRMS.Domain.Enums.AuditAction.Approve
+            or WRMS.Domain.Enums.AuditAction.Reinstate or WRMS.Domain.Enums.AuditAction.Renew
+            or WRMS.Domain.Enums.AuditAction.Login => "status-active",
+        WRMS.Domain.Enums.AuditAction.Reject or WRMS.Domain.Enums.AuditAction.Suspend
+            or WRMS.Domain.Enums.AuditAction.Revoke or WRMS.Domain.Enums.AuditAction.Delete
+            or WRMS.Domain.Enums.AuditAction.LoginFailed => "status-suspended",
+        WRMS.Domain.Enums.AuditAction.Update or WRMS.Domain.Enums.AuditAction.Transfer => "status-info",
+        _ => "status-expired"
+    };
+}
+
+<div class="page-header">
+    <div>
+        <div class="page-eyebrow">Insights</div>
+        <h1 class="page-heading">Audit Logs</h1>
+        <p class="page-subtitle">System activity trail &mdash; logins, record changes, approvals, and administrative actions.</p>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label small">User</label>
+                <input type="text" name="userName" value="@ViewData["UserName"]" class="form-control" placeholder="Search by name..." />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small">Action</label>
+                <select name="action" class="form-select" asp-items="Html.GetEnumSelectList<WRMS.Domain.Enums.AuditAction>()">
+                    <option value="">-- Any --</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small">Entity Type</label>
+                <select name="entityType" class="form-select">
+                    <option value="">-- Any --</option>
+                    @foreach (var et in entityTypes)
+                    {
+                        <option value="@et" selected="@(et == ViewData["SelectedEntityType"] as string)">@et</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small">From</label>
+                <input type="date" name="dateFrom" value="@ViewData["DateFrom"]" class="form-control" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small">To</label>
+                <input type="date" name="dateTo" value="@ViewData["DateTo"]" class="form-control" />
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-navy w-100"><i class="bi bi-funnel"></i></button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        @if (Model.Count == 0)
+        {
+            <partial name="_EmptyState" model="@(new WRMS.Web.Models.Shared.EmptyStateViewModel {
+                Icon = "bi-journal-text",
+                Title = "No matching activity",
+                Message = "No audit log entries match your current filters. Try widening the date range or clearing filters."
+            })" />
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle" id="auditTable">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>User</th>
+                            <th>Action</th>
+                            <th>Entity</th>
+                            <th>Entity ID</th>
+                            <th>Details</th>
+                            <th>IP Address</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var log in Model)
+                        {
+                            <tr>
+                                <td class="text-nowrap text-muted">@log.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                                <td>@(log.UserName ?? "-")</td>
+                                <td><span class="status-badge @BadgeFor(log.Action)">@log.Action</span></td>
+                                <td>@log.EntityType</td>
+                                <td class="small text-muted">@log.EntityId</td>
+                                <td class="small">@log.Details</td>
+                                <td class="small text-muted">@(log.IpAddress ?? "-")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            if ($('#auditTable').length) {
+                $('#auditTable').DataTable({ order: [[0, 'desc']], pageLength: 25 });
+            }
+        });
+    </script>
+}

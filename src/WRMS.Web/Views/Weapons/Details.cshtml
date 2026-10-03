@@ -1,0 +1,158 @@
+@model WRMS.Application.DTOs.Weapons.WeaponDetailDto
+@{
+    ViewData["Title"] = $"Weapon - {Model.RegistrationId}";
+}
+
+<div class="page-header">
+    <div>
+        <div class="page-eyebrow">Registry &bull; Weapon</div>
+        <h1 class="page-heading">@Model.RegistrationId <span class="status-badge status-@Model.Status.ToString().ToLowerInvariant() ms-2 align-middle">@Model.Status</span></h1>
+        <p class="page-subtitle">@Model.Manufacturer @Model.Model &mdash; @Model.CategoryName</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary"><i class="bi bi-pencil me-1"></i> Edit</a>
+        @if (Model.Status == WRMS.Domain.Enums.WeaponStatus.Active)
+        {
+            <a asp-controller="Transfers" asp-action="Create" asp-route-weaponId="@Model.Id" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left-right me-1"></i> Transfer Ownership
+            </a>
+        }
+        @if ((User.IsInRole("Admin") || User.IsInRole("Officer")) && Model.Status != WRMS.Domain.Enums.WeaponStatus.PendingApproval)
+        {
+            <button type="button" class="btn btn-navy" data-bs-toggle="modal" data-bs-target="#statusModal">
+                <i class="bi bi-shield-exclamation me-1"></i> Change Status
+            </button>
+        }
+    </div>
+</div>
+
+@if (Model.Status == WRMS.Domain.Enums.WeaponStatus.PendingApproval)
+{
+    <div class="alert alert-warning"><i class="bi bi-hourglass-split me-1"></i> This registration is pending officer review and approval.</div>
+}
+@if (Model.Status == WRMS.Domain.Enums.WeaponStatus.Rejected && !string.IsNullOrWhiteSpace(Model.LatestRejectionReason))
+{
+    <div class="alert alert-danger"><i class="bi bi-x-circle me-1"></i> Rejected: @Model.LatestRejectionReason</div>
+}
+
+<div class="row g-3">
+    <div class="col-lg-5">
+        <div class="card mb-3">
+            <div class="card-header">Registration Details</div>
+            <div class="card-body small">
+                <dl class="row mb-0">
+                    <dt class="col-5">Owner</dt><dd class="col-7"><a asp-controller="Owners" asp-action="Details" asp-route-id="@Model.OwnerId">@Model.OwnerName</a> (@Model.OwnerCode)</dd>
+                    <dt class="col-5">Category</dt><dd class="col-7">@Model.CategoryName</dd>
+                    <dt class="col-5">Serial Number</dt><dd class="col-7">@Model.SerialNumber</dd>
+                    <dt class="col-5">Caliber</dt><dd class="col-7">@Model.Caliber</dd>
+                    <dt class="col-5">Manufactured</dt><dd class="col-7">@(Model.DateOfManufacture?.ToString("yyyy-MM-dd") ?? "-")</dd>
+                    <dt class="col-5">Registered</dt><dd class="col-7">@Model.RegistrationDate.ToString("yyyy-MM-dd")</dd>
+                    <dt class="col-5">Location</dt><dd class="col-7">@Model.RegistrationLocation</dd>
+                </dl>
+                @if (!string.IsNullOrWhiteSpace(Model.Notes))
+                {
+                    <hr />
+                    <div><strong>Notes</strong><br />@Model.Notes</div>
+                }
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">License</div>
+            <div class="card-body small">
+                @if (Model.License is null)
+                {
+                    <p class="text-muted mb-0">No license issued yet.</p>
+                    @if (Model.Status == WRMS.Domain.Enums.WeaponStatus.Active && (User.IsInRole("Admin") || User.IsInRole("Officer")))
+                    {
+                        <a asp-controller="Licenses" asp-action="Create" asp-route-weaponId="@Model.Id" class="btn btn-sm btn-navy mt-2">Issue License</a>
+                    }
+                }
+                else
+                {
+                    <dl class="row mb-0">
+                        <dt class="col-5">License #</dt><dd class="col-7">@Model.License.LicenseNumber</dd>
+                        <dt class="col-5">Status</dt><dd class="col-7"><span class="status-badge status-@Model.License.Status.ToString().ToLowerInvariant()">@Model.License.Status</span></dd>
+                        <dt class="col-5">Issued</dt><dd class="col-7">@Model.License.IssueDate.ToString("yyyy-MM-dd")</dd>
+                        <dt class="col-5">Expires</dt><dd class="col-7">@Model.License.ExpiryDate.ToString("yyyy-MM-dd")</dd>
+                    </dl>
+                    <a asp-controller="Licenses" asp-action="Details" asp-route-id="@Model.License.Id" class="btn btn-sm btn-outline-secondary mt-2">View License</a>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header">Supporting Documents</div>
+            <div class="card-body">
+                @if (Model.Documents.Count > 0)
+                {
+                    <ul class="list-group mb-3">
+                        @foreach (var doc in Model.Documents)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-file-earmark-text me-1"></i> @doc.FileName <span class="text-muted small">(@((doc.FileSizeBytes / 1024.0).ToString("N0")) KB)</span></span>
+                                <a asp-action="DownloadDocument" asp-route-documentId="@doc.Id" class="btn btn-sm btn-outline-secondary">Download</a>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted small">No documents uploaded.</p>
+                }
+
+                <form asp-action="UploadDocument" method="post" enctype="multipart/form-data" class="row g-2 align-items-end">
+                    <input type="hidden" name="weaponId" value="@Model.Id" />
+                    <div class="col-md-6">
+                        <label class="form-label small">File (PDF, JPG, PNG &mdash; max 10 MB)</label>
+                        <input type="file" name="file" class="form-control" required accept=".pdf,.jpg,.jpeg,.png" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small">Description</label>
+                        <input type="text" name="description" class="form-control" maxlength="500" />
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-navy w-100"><i class="bi bi-upload"></i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if ((User.IsInRole("Admin") || User.IsInRole("Officer")) && Model.Status != WRMS.Domain.Enums.WeaponStatus.PendingApproval)
+{
+    <div class="modal fade" id="statusModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form asp-action="SetStatus" method="post">
+                <input type="hidden" name="id" value="@Model.Id" />
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="bi bi-exclamation-triangle text-warning me-2"></i>Change Weapon Status</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label required-asterisk">New Status</label>
+                            <select name="status" class="form-select">
+                                <option value="@WRMS.Domain.Enums.WeaponStatus.Active">Active</option>
+                                <option value="@WRMS.Domain.Enums.WeaponStatus.Suspended">Suspended</option>
+                                <option value="@WRMS.Domain.Enums.WeaponStatus.Revoked">Revoked</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Reason / Notes</label>
+                            <textarea name="reason" class="form-control" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-navy">Confirm</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+}

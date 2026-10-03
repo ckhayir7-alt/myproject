@@ -1,0 +1,65 @@
+@model List<WRMS.Application.DTOs.Settings.WeaponCategoryDto>
+@{
+    ViewData["Title"] = "Weapon Categories";
+}
+
+<div class="page-header">
+    <div>
+        <a asp-action="Index" class="page-eyebrow"><i class="bi bi-arrow-left me-1"></i>Back to Settings</a>
+        <h1 class="page-heading">Weapon Categories</h1>
+        <p class="page-subtitle">Configure the categories available for weapon registration.</p>
+    </div>
+    <a asp-action="CreateCategory" class="btn btn-navy"><i class="bi bi-plus-circle me-1"></i> New Category</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        @if (Model.Count == 0)
+        {
+            <partial name="_EmptyState" model="@(new WRMS.Web.Models.Shared.EmptyStateViewModel {
+                Icon = "bi-tags",
+                Title = "No weapon categories yet",
+                Message = "Add a category so it becomes available when registering a weapon.",
+                ActionText = "New Category",
+                ActionUrl = Url.Action("CreateCategory")
+            })" />
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead><tr><th>Name</th><th>Description</th><th>Weapons</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+                    <tbody>
+                        @foreach (var c in Model)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@c.Name</td>
+                                <td class="text-muted small">@c.Description</td>
+                                <td>@c.WeaponCount</td>
+                                <td>
+                                    @if (c.IsActive)
+                                    {
+                                        <span class="status-badge status-active">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="status-badge status-revoked">Inactive</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    <a asp-action="EditCategory" asp-route-id="@c.Id" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+                                    <form asp-action="ToggleCategoryActive" asp-route-id="@c.Id" method="post" class="d-inline"
+                                          data-confirm="Are you sure you want to @(c.IsActive ? "deactivate" : "activate") this category?">
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                            <i class="bi @(c.IsActive ? "bi-slash-circle" : "bi-check-circle")"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

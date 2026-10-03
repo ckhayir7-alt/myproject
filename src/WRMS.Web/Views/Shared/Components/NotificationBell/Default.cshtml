@@ -1,0 +1,34 @@
+@model WRMS.Web.ViewComponents.NotificationBellViewModel
+
+<div class="dropdown">
+    <button class="btn btn-light position-relative" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
+        <i class="bi bi-bell"></i>
+        @if (Model.UnreadCount > 0)
+        {
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
+                @(Model.UnreadCount > 99 ? "99+" : Model.UnreadCount.ToString())
+            </span>
+        }
+    </button>
+    <div class="dropdown-menu dropdown-menu-end p-0" style="width: 340px;">
+        <div class="px-3 py-2 border-bottom fw-semibold d-flex justify-content-between align-items-center">
+            <span>Notifications</span>
+            <a asp-controller="Notifications" asp-action="Index" class="small">View all</a>
+        </div>
+        @if (Model.Recent.Count == 0)
+        {
+            <div class="text-center text-muted py-4 small">No notifications</div>
+        }
+        else
+        {
+            @foreach (var n in Model.Recent)
+            {
+                <a asp-controller="Notifications" asp-action="Index" class="dropdown-item py-2 @(n.IsRead ? "" : "bg-light")">
+                    <div class="fw-semibold small">@n.Title</div>
+                    <div class="small text-muted text-truncate">@n.Message</div>
+                    <div class="small text-muted">@n.CreatedAt.ToString("MMM d, HH:mm")</div>
+                </a>
+            }
+        }
+    </div>
+</div>

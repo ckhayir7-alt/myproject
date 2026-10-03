@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+        // Applied synchronously, before first paint, to avoid a flash of the expanded
+        // sidebar on every page load when the user has chosen to keep it collapsed.
+        if (localStorage.getItem("wrms-sidebar-collapsed") === "1") {
+            document.documentElement.classList.add("sidebar-collapsed");
+        }
+    </script>
+    <title>@ViewData["Title"] - Weapon Registration &amp; Management System</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="~/lib/datatables/css/dataTables.bootstrap5.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <div class="app-shell">
+        <partial name="_Sidebar" />
+
+        <div class="app-main">
+            <partial name="_TopBar" />
+
+            <main role="main" class="app-content">
+                <partial name="_AlertsPartial" />
+                @RenderBody()
+            </main>
+
+            <footer class="app-footer">
+                &copy; @DateTime.Now.Year Weapon Registration &amp; Management System &mdash; Authorized Personnel Only. All activity is logged and monitored.
+            </footer>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/datatables/js/jquery.dataTables.min.js"></script>
+    <script src="~/lib/datatables/js/dataTables.bootstrap5.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

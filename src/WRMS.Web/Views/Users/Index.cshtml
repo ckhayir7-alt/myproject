@@ -1,0 +1,89 @@
+@model List<WRMS.Web.Models.Users.UserListItemViewModel>
+@{
+    ViewData["Title"] = "User Management";
+}
+
+<div class="page-header">
+    <div>
+        <div class="page-eyebrow">Administration</div>
+        <h1 class="page-heading">User Management</h1>
+        <p class="page-subtitle">Manage system accounts and role assignments.</p>
+    </div>
+    <a asp-action="Create" class="btn btn-navy">
+        <i class="bi bi-person-plus me-1"></i> New User
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle" id="usersTable">
+                <thead>
+                    <tr>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Roles</th>
+                        <th>Status</th>
+                        <th>Last Login</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model)
+                    {
+                        <tr>
+                            <td>@user.FullName</td>
+                            <td>@user.Email</td>
+                            <td>
+                                @foreach (var role in user.Roles)
+                                {
+                                    <span class="status-badge status-info me-1">@role</span>
+                                }
+                            </td>
+                            <td>
+                                @if (user.IsLockedOut)
+                                {
+                                    <span class="status-badge status-suspended">Locked Out</span>
+                                }
+                                else if (user.IsActive)
+                                {
+                                    <span class="status-badge status-active">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge status-revoked">Inactive</span>
+                                }
+                            </td>
+                            <td>@(user.LastLoginAt?.ToString("yyyy-MM-dd HH:mm") ?? "Never")</td>
+                            <td class="text-end">
+                                <a asp-action="Edit" asp-route-id="@user.Id" class="btn btn-sm btn-outline-secondary" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a asp-action="ResetPassword" asp-route-id="@user.Id" class="btn btn-sm btn-outline-secondary" title="Reset Password">
+                                    <i class="bi bi-key"></i>
+                                </a>
+                                <form asp-action="ToggleActive" asp-route-id="@user.Id" method="post" class="d-inline"
+                                      data-confirm="Are you sure you want to @(user.IsActive ? "deactivate" : "reactivate") this user?">
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary" title="@(user.IsActive ? "Deactivate" : "Activate")">
+                                        <i class="bi @(user.IsActive ? "bi-slash-circle" : "bi-check-circle")"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            $('#usersTable').DataTable({
+                order: [[0, 'asc']],
+                pageLength: 25
+            });
+        });
+    </script>
+}

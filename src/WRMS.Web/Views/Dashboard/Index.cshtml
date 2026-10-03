@@ -1,0 +1,287 @@
+@using System.Text.Json
+@model WRMS.Web.Models.Dashboard.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+    var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+    var canReview = User.IsInRole("Admin") || User.IsInRole("Officer");
+}
+
+<div class="page-header">
+    <div>
+        <div class="page-eyebrow">Overview</div>
+        <h1 class="page-heading">Dashboard</h1>
+        <p class="page-subtitle">System-wide registration, licensing, and compliance overview.</p>
+    </div>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-sm-6 col-lg-4 col-xl-2">
+        <a asp-controller="Weapons" asp-action="Index" class="stat-card-link">
+            <div class="stat-card accent-navy">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="stat-value">@Model.Stats.TotalWeapons.ToString("N0")</div>
+                        <div class="stat-label">Total Registered</div>
+                    </div>
+                    <div class="stat-icon"><i class="bi bi-box-seam"></i></div>
+                </div>
+                <div class="stat-trend @(Model.Stats.NewWeaponsLast30Days > 0 ? "trend-up" : "trend-flat")">
+                    @if (Model.Stats.NewWeaponsLast30Days > 0)
+                    {
+                        <i class="bi bi-arrow-up-short"></i> <span>+@Model.Stats.NewWeaponsLast30Days</span> <span class="trend-context">last 30 days</span>
+                    }
+                    else
+                    {
+                        <span class="trend-context">No new registrations in 30 days</span>
+                    }
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-sm-6 col-lg-4 col-xl-2">
+        <a asp-controller="Owners" asp-action="Index" class="stat-card-link">
+            <div class="stat-card accent-info">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="stat-value">@Model.Stats.TotalOwners.ToString("N0")</div>
+                        <div class="stat-label">Registered Owners</div>
+                    </div>
+                    <div class="stat-icon"><i class="bi bi-person-vcard"></i></div>
+                </div>
+                <div class="stat-trend @(Model.Stats.NewOwnersLast30Days > 0 ? "trend-up" : "trend-flat")">
+                    @if (Model.Stats.NewOwnersLast30Days > 0)
+                    {
+                        <i class="bi bi-arrow-up-short"></i> <span>+@Model.Stats.NewOwnersLast30Days</span> <span class="trend-context">last 30 days</span>
+                    }
+                    else
+                    {
+                        <span class="trend-context">No new owners in 30 days</span>
+                    }
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-sm-6 col-lg-4 col-xl-2">
+        <a asp-controller="Licenses" asp-action="Index" class="stat-card-link">
+            <div class="stat-card accent-success">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="stat-value">@Model.Stats.ActiveLicenses.ToString("N0")</div>
+                        <div class="stat-label">Active Licenses</div>
+                    </div>
+                    <div class="stat-icon"><i class="bi bi-card-checklist"></i></div>
+                </div>
+                <div class="stat-trend @(Model.Stats.NewLicensesLast30Days > 0 ? "trend-up" : "trend-flat")">
+                    @if (Model.Stats.NewLicensesLast30Days > 0)
+                    {
+                        <i class="bi bi-arrow-up-short"></i> <span>+@Model.Stats.NewLicensesLast30Days</span> <span class="trend-context">issued in 30 days</span>
+                    }
+                    else
+                    {
+                        <span class="trend-context">None issued in 30 days</span>
+                    }
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-sm-6 col-lg-4 col-xl-2">
+        @if (canReview)
+        {
+            <a asp-controller="Approvals" asp-action="Index" class="stat-card-link">
+                <div class="stat-card accent-warning">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stat-value">@Model.Stats.PendingRegistrations.ToString("N0")</div>
+                            <div class="stat-label">Pending Approval</div>
+                        </div>
+                        <div class="stat-icon"><i class="bi bi-hourglass-split"></i></div>
+                    </div>
+                    <div class="stat-trend @(Model.Stats.PendingRegistrations > 0 ? "trend-down" : "trend-flat")">
+                        <span class="trend-context">@(Model.Stats.PendingRegistrations > 0 ? "Requires attention" : "All caught up")</span>
+                    </div>
+                </div>
+            </a>
+        }
+        else
+        {
+            <a asp-controller="Search" asp-action="Index" asp-route-status="PendingApproval" class="stat-card-link">
+                <div class="stat-card accent-warning">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stat-value">@Model.Stats.PendingRegistrations.ToString("N0")</div>
+                            <div class="stat-label">Pending Approval</div>
+                        </div>
+                        <div class="stat-icon"><i class="bi bi-hourglass-split"></i></div>
+                    </div>
+                    <div class="stat-trend @(Model.Stats.PendingRegistrations > 0 ? "trend-down" : "trend-flat")">
+                        <span class="trend-context">@(Model.Stats.PendingRegistrations > 0 ? "Requires attention" : "All caught up")</span>
+                    </div>
+                </div>
+            </a>
+        }
+    </div>
+    <div class="col-sm-6 col-lg-4 col-xl-2">
+        <a asp-controller="Licenses" asp-action="Index" class="stat-card-link">
+            <div class="stat-card accent-gold">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="stat-value">@Model.Stats.ExpiredLicenses.ToString("N0")</div>
+                        <div class="stat-label">Expired Licenses</div>
+                    </div>
+                    <div class="stat-icon"><i class="bi bi-calendar-x"></i></div>
+                </div>
+                <div class="stat-trend trend-flat">
+                    <span class="trend-context">Needs renewal</span>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-sm-6 col-lg-4 col-xl-2">
+        <a asp-controller="Weapons" asp-action="Index" class="stat-card-link">
+            <div class="stat-card accent-danger">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="stat-value">@Model.Stats.SuspendedOrRevokedWeapons.ToString("N0")</div>
+                        <div class="stat-label">Suspended / Revoked</div>
+                    </div>
+                    <div class="stat-icon"><i class="bi bi-shield-exclamation"></i></div>
+                </div>
+                <div class="stat-trend trend-flat">
+                    <span class="trend-context">Compliance watchlist</span>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+@if (Model.Stats.PendingTransfers > 0 || Model.Stats.LicensesExpiringSoon > 0)
+{
+    <div class="alert alert-warning d-flex flex-wrap gap-3 align-items-center mb-3">
+        <i class="bi bi-bell-fill"></i>
+        @if (Model.Stats.PendingTransfers > 0)
+        {
+            <span><a asp-controller="Transfers" asp-action="Index" class="fw-semibold">@Model.Stats.PendingTransfers pending ownership transfer(s)</a> awaiting review.</span>
+        }
+        @if (Model.Stats.LicensesExpiringSoon > 0)
+        {
+            <span><a asp-controller="Licenses" asp-action="Index" class="fw-semibold">@Model.Stats.LicensesExpiringSoon license(s)</a> expiring within 30 days.</span>
+        }
+    </div>
+}
+
+<div class="row g-3 mb-3">
+    <div class="col-lg-4">
+        <div class="card chart-card h-100">
+            <div class="card-header d-flex align-items-center gap-2"><i class="bi bi-pie-chart"></i> Weapons by Category</div>
+            <div class="card-body"><canvas id="categoryChart" height="230"></canvas></div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card chart-card h-100">
+            <div class="card-header d-flex align-items-center gap-2"><i class="bi bi-bar-chart"></i> Weapons by Status</div>
+            <div class="card-body"><canvas id="statusChart" height="230"></canvas></div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card chart-card h-100">
+            <div class="card-header d-flex align-items-center gap-2"><i class="bi bi-graph-up"></i> Registrations (Last 6 Months)</div>
+            <div class="card-body"><canvas id="trendChart" height="230"></canvas></div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex align-items-center gap-2"><i class="bi bi-clock-history text-muted"></i> Recent Activity</div>
+    <div class="card-body p-0">
+        @if (Model.RecentActivity.Count == 0)
+        {
+            <partial name="_EmptyState" model="@(new WRMS.Web.Models.Shared.EmptyStateViewModel {
+                Icon = "bi-clock-history",
+                Title = "No activity recorded yet",
+                Message = "System activity will appear here as registrations, approvals, and other actions take place."
+            })" />
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead><tr><th>Time</th><th>Action</th><th>Entity</th><th>User</th><th>Details</th></tr></thead>
+                    <tbody>
+                        @foreach (var a in Model.RecentActivity)
+                        {
+                            <tr>
+                                <td class="text-nowrap text-muted">@a.Timestamp.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td><span class="fw-semibold">@a.Action</span></td>
+                                <td>@a.EntityType</td>
+                                <td>@(a.UserName ?? "-")</td>
+                                <td class="small text-muted">@a.Details</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/chartjs/chart.umd.js"></script>
+    <script>
+        const categoryData = @Html.Raw(JsonSerializer.Serialize(Model.WeaponsByCategory, jsonOptions));
+        const statusData = @Html.Raw(JsonSerializer.Serialize(Model.WeaponsByStatus, jsonOptions));
+        const trendData = @Html.Raw(JsonSerializer.Serialize(Model.RegistrationTrend, jsonOptions));
+
+        Chart.defaults.font.family = "Inter, 'Segoe UI', sans-serif";
+        Chart.defaults.color = '#64748B';
+
+        const palette = ['#0B1F3A', '#C9A227', '#2563EB', '#16A34A', '#D97706', '#DC2626', '#64748B', '#0F766E'];
+
+        // Chart cards use a blue background, so legends/ticks/grid lines use light colors here
+        // rather than the page-wide (dark-on-white) Chart.defaults set above.
+        const lightText = '#E4ECFB';
+        const lightGrid = 'rgba(255,255,255,0.14)';
+        const onBluePalette = ['#FFFFFF', '#C9A227', '#93C5FD', '#7DD3C0', '#FBBF77', '#F1A9A9', '#B7C4DE', '#5EEAD4'];
+
+        new Chart(document.getElementById('categoryChart'), {
+            type: 'doughnut',
+            data: {
+                labels: categoryData.map(x => x.name),
+                datasets: [{ data: categoryData.map(x => x.count), backgroundColor: onBluePalette, borderWidth: 2, borderColor: '#12345B' }]
+            },
+            options: {
+                cutout: '65%',
+                plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 12, font: { size: 11 }, color: lightText } } }
+            }
+        });
+
+        new Chart(document.getElementById('statusChart'), {
+            type: 'bar',
+            data: {
+                labels: statusData.map(x => x.name),
+                datasets: [{ label: 'Weapons', data: statusData.map(x => x.count), backgroundColor: '#C9A227', borderRadius: 6, maxBarThickness: 36 }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { precision: 0, color: lightText }, grid: { color: lightGrid } },
+                    x: { ticks: { color: lightText }, grid: { display: false } }
+                }
+            }
+        });
+
+        new Chart(document.getElementById('trendChart'), {
+            type: 'line',
+            data: {
+                labels: trendData.map(x => x.label),
+                datasets: [{ label: 'Registrations', data: trendData.map(x => x.count), borderColor: '#C9A227', backgroundColor: 'rgba(201,162,39,0.22)', fill: true, tension: 0.35, pointRadius: 3, pointBackgroundColor: '#C9A227' }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { precision: 0, color: lightText }, grid: { color: lightGrid } },
+                    x: { ticks: { color: lightText }, grid: { display: false } }
+                }
+            }
+        });
+    </script>
+}

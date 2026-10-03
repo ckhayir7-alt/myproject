@@ -1,0 +1,79 @@
+@model WRMS.Web.Models.Weapons.WeaponFormViewModel
+
+<input type="hidden" asp-for="Id" />
+
+<div class="form-section">
+    <div class="form-section-title"><i class="bi bi-tags text-muted"></i> Classification &amp; Owner</div>
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label asp-for="CategoryId" class="form-label required-asterisk"></label>
+            <select asp-for="CategoryId" class="form-select">
+                <option value="">-- Select category --</option>
+                @foreach (var c in Model.Categories)
+                {
+                    <option value="@c.Id">@c.Name</option>
+                }
+            </select>
+            <span asp-validation-for="CategoryId" class="text-danger small"></span>
+        </div>
+        <div class="col-md-6 mb-3 mb-md-0">
+            <label asp-for="OwnerId" class="form-label required-asterisk"></label>
+            <select asp-for="OwnerId" class="form-select">
+                <option value="">-- Select owner --</option>
+                @foreach (var o in Model.Owners)
+                {
+                    <option value="@o.Id">@o.FullName (@o.OwnerCode)</option>
+                }
+            </select>
+            <span asp-validation-for="OwnerId" class="text-danger small"></span>
+        </div>
+    </div>
+</div>
+
+<div class="form-section">
+    <div class="form-section-title"><i class="bi bi-box-seam text-muted"></i> Weapon Details</div>
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label asp-for="Manufacturer" class="form-label required-asterisk"></label>
+            <input asp-for="Manufacturer" class="form-control" placeholder="e.g. Smith &amp; Wesson" />
+            <span asp-validation-for="Manufacturer" class="text-danger small"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="Model" class="form-label required-asterisk"></label>
+            <input asp-for="Model" class="form-control" placeholder="e.g. M&amp;P Shield" />
+            <span asp-validation-for="Model" class="text-danger small"></span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label asp-for="SerialNumber" class="form-label required-asterisk"></label>
+            <input asp-for="SerialNumber" class="form-control" />
+            <span asp-validation-for="SerialNumber" class="text-danger small"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="Caliber" class="form-label required-asterisk"></label>
+            <input asp-for="Caliber" class="form-control" placeholder="e.g. 9mm" />
+            <span asp-validation-for="Caliber" class="text-danger small"></span>
+        </div>
+        <div class="col-md-4 mb-3 mb-md-0">
+            <label asp-for="DateOfManufacture" class="form-label"></label>
+            <input asp-for="DateOfManufacture" type="date" class="form-control" />
+            <span asp-validation-for="DateOfManufacture" class="text-danger small"></span>
+        </div>
+    </div>
+</div>
+
+<div class="form-section">
+    <div class="form-section-title"><i class="bi bi-geo-alt text-muted"></i> Registration Information</div>
+    <div class="mb-3">
+        <label asp-for="RegistrationLocation" class="form-label required-asterisk"></label>
+        <input asp-for="RegistrationLocation" class="form-control" placeholder="Registering office / location" />
+        <span asp-validation-for="RegistrationLocation" class="text-danger small"></span>
+    </div>
+
+    <div class="mb-0">
+        <label asp-for="Notes" class="form-label"></label>
+        <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Optional internal notes"></textarea>
+    </div>
+</div>

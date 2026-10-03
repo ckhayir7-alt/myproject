@@ -1,0 +1,87 @@
+@model WRMS.Application.DTOs.Transfers.TransferDetailDto
+@{
+    ViewData["Title"] = "Transfer Details";
+}
+
+<div class="page-header">
+    <div>
+        <div class="page-eyebrow">Registry &bull; Transfer</div>
+        <h1 class="page-heading">Ownership Transfer <span class="status-badge status-@Model.ApprovalStatus.ToString().ToLowerInvariant() ms-2 align-middle">@Model.ApprovalStatus</span></h1>
+        <p class="page-subtitle">
+            <a asp-controller="Weapons" asp-action="Details" asp-route-id="@Model.WeaponId">@Model.WeaponRegistrationId</a>
+            &mdash; @Model.WeaponDescription
+        </p>
+    </div>
+    @if (Model.ApprovalStatus == WRMS.Domain.Enums.TransferApprovalStatus.Pending && (User.IsInRole("Admin") || User.IsInRole("Officer")))
+    {
+        <div>
+            <form asp-action="Decide" method="post" class="d-inline">
+                <input type="hidden" name="TransferId" value="@Model.Id" />
+                <input type="hidden" name="Approve" value="true" />
+                <button type="submit" class="btn btn-navy" data-confirm="Approve this ownership transfer?">
+                    <i class="bi bi-check2-circle me-1"></i> Approve
+                </button>
+            </form>
+            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                <i class="bi bi-x-circle me-1"></i> Reject
+            </button>
+        </div>
+    }
+</div>
+
+<div class="card">
+    <div class="card-header">Transfer Details</div>
+    <div class="card-body small">
+        <dl class="row mb-0">
+            <dt class="col-3">Previous Owner</dt>
+            <dd class="col-9"><a asp-controller="Owners" asp-action="Details" asp-route-id="@Model.PreviousOwnerId">@Model.PreviousOwnerName</a></dd>
+            <dt class="col-3">New Owner</dt>
+            <dd class="col-9"><a asp-controller="Owners" asp-action="Details" asp-route-id="@Model.NewOwnerId">@Model.NewOwnerName</a></dd>
+            <dt class="col-3">Transfer Date</dt>
+            <dd class="col-9">@Model.TransferDate.ToString("yyyy-MM-dd HH:mm")</dd>
+            <dt class="col-3">Reason</dt>
+            <dd class="col-9">@Model.Reason</dd>
+            @if (!string.IsNullOrWhiteSpace(Model.Notes))
+            {
+                <dt class="col-3">Notes</dt>
+                <dd class="col-9">@Model.Notes</dd>
+            }
+            @if (Model.ApprovedAt.HasValue)
+            {
+                <dt class="col-3">Reviewed</dt>
+                <dd class="col-9">@Model.ApprovedAt.Value.ToString("yyyy-MM-dd HH:mm") by @(Model.ApprovedByName ?? "-")</dd>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.RejectionReason))
+            {
+                <dt class="col-3">Rejection Reason</dt>
+                <dd class="col-9 text-danger">@Model.RejectionReason</dd>
+            }
+        </dl>
+    </div>
+</div>
+
+@if (Model.ApprovalStatus == WRMS.Domain.Enums.TransferApprovalStatus.Pending && (User.IsInRole("Admin") || User.IsInRole("Officer")))
+{
+    <div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form asp-action="Decide" method="post">
+                <input type="hidden" name="TransferId" value="@Model.Id" />
+                <input type="hidden" name="Approve" value="false" />
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="bi bi-exclamation-triangle text-warning me-2"></i>Reject Transfer</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label class="form-label required-asterisk">Rejection Reason</label>
+                        <textarea name="RejectionReason" class="form-control" rows="3" required></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-outline-danger">Confirm Rejection</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+}

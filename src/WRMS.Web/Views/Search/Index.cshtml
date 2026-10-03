@@ -1,0 +1,112 @@
+@model List<WRMS.Application.DTOs.Search.SearchResultItemDto>
+@{
+    ViewData["Title"] = "Search & Verification";
+    var query = ViewData["Query"] as string;
+    var selectedStatus = ViewData["SelectedStatus"] as WRMS.Domain.Enums.WeaponStatus?;
+    var hasSearched = !string.IsNullOrWhiteSpace(query) || selectedStatus.HasValue;
+}
+
+<div class="page-header">
+    <div>
+        <div class="page-eyebrow">Workflow</div>
+        <h1 class="page-heading">Search &amp; Verification</h1>
+        <p class="page-subtitle">Look up and verify registration records by ID, serial number, license, or owner details.</p>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-6">
+                <label class="form-label small"><i class="bi bi-search me-1"></i>Search Term</label>
+                <input type="text" name="q" value="@query" class="form-control form-control-lg" placeholder="Registration ID, serial number, license number, owner name..." autofocus />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small">Registration Status</label>
+                <select name="status" class="form-select form-select-lg" asp-items="Html.GetEnumSelectList<WRMS.Domain.Enums.WeaponStatus>()">
+                    <option value="">-- Any status --</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-navy btn-lg w-100"><i class="bi bi-search me-1"></i> Search</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (Model.Count > 0)
+{
+    <div class="card">
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <span><i class="bi bi-list-check text-muted me-1"></i>@Model.Count Result@(Model.Count == 1 ? "" : "s")</span>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle" id="searchTable">
+                    <thead>
+                        <tr>
+                            <th>Registration ID</th>
+                            <th>Serial Number</th>
+                            <th>Weapon</th>
+                            <th>Owner</th>
+                            <th>License</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var r in Model)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@r.RegistrationId</td>
+                                <td>@r.SerialNumber</td>
+                                <td>@r.Manufacturer @r.Model (@r.CategoryName)</td>
+                                <td>@r.OwnerName (@r.OwnerCode)</td>
+                                <td>@(r.LicenseNumber ?? "-")</td>
+                                <td><span class="status-badge status-@r.Status.ToString().ToLowerInvariant()">@r.Status</span></td>
+                                <td class="text-end">
+                                    <a asp-controller="Weapons" asp-action="Details" asp-route-id="@r.WeaponId" class="btn btn-sm btn-outline-secondary">View</a>
+                                    <a asp-action="Verify" asp-route-weaponId="@r.WeaponId" class="btn btn-sm btn-navy"><i class="bi bi-patch-check me-1"></i>Verify</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+else if (hasSearched)
+{
+    <div class="card">
+        <div class="card-body">
+            <partial name="_EmptyState" model="@(new WRMS.Web.Models.Shared.EmptyStateViewModel {
+                Icon = "bi-search",
+                Title = "No matching records found",
+                Message = "Try a different registration ID, serial number, license number, or owner name."
+            })" />
+        </div>
+    </div>
+}
+else
+{
+    <div class="card">
+        <div class="card-body">
+            <partial name="_EmptyState" model="@(new WRMS.Web.Models.Shared.EmptyStateViewModel {
+                Icon = "bi-shield-lock",
+                Title = "Secure verification portal",
+                Message = "Enter a registration ID, serial number, license number, or owner detail above to look up and verify a record."
+            })" />
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        $(function () {
+            if ($('#searchTable tbody tr').length) {
+                $('#searchTable').DataTable({ pageLength: 25 });
+            }
+        });
+    </script>
+}

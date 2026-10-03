@@ -1,0 +1,92 @@
+@model WRMS.Application.DTOs.Approvals.ApprovalReviewDto
+@{
+    ViewData["Title"] = "Review Registration";
+}
+
+<div class="page-header">
+    <div>
+        <div class="page-eyebrow">Workflow &bull; Approval</div>
+        <h1 class="page-heading">Review Registration &mdash; @Model.RegistrationId</h1>
+        <p class="page-subtitle">Submitted @Model.SubmittedAt.ToString("yyyy-MM-dd HH:mm") by @(Model.SubmittedByName ?? "unknown")</p>
+    </div>
+</div>
+
+<div asp-validation-summary="ModelOnly" class="text-danger small mb-2"></div>
+
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="card mb-3">
+            <div class="card-header">Weapon Details</div>
+            <div class="card-body small">
+                <dl class="row mb-0">
+                    <dt class="col-5">Category</dt><dd class="col-7">@Model.CategoryName</dd>
+                    <dt class="col-5">Manufacturer</dt><dd class="col-7">@Model.Manufacturer</dd>
+                    <dt class="col-5">Model</dt><dd class="col-7">@Model.Model</dd>
+                    <dt class="col-5">Serial Number</dt><dd class="col-7">@Model.SerialNumber</dd>
+                    <dt class="col-5">Caliber</dt><dd class="col-7">@Model.Caliber</dd>
+                    <dt class="col-5">Location</dt><dd class="col-7">@Model.RegistrationLocation</dd>
+                </dl>
+                @if (!string.IsNullOrWhiteSpace(Model.Notes))
+                {
+                    <hr /><div><strong>Notes</strong><br />@Model.Notes</div>
+                }
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">Owner</div>
+            <div class="card-body small">
+                <a asp-controller="Owners" asp-action="Details" asp-route-id="@Model.WeaponId">@Model.OwnerName</a> (@Model.OwnerCode)
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card mb-3">
+            <div class="card-header">Supporting Documents</div>
+            <div class="card-body">
+                @if (Model.Documents.Count == 0)
+                {
+                    <p class="text-muted small mb-0">No documents were uploaded with this submission.</p>
+                }
+                else
+                {
+                    <ul class="list-group">
+                        @foreach (var d in Model.Documents)
+                        {
+                            <li class="list-group-item"><i class="bi bi-file-earmark-text me-1"></i> @d.FileName</li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">Decision</div>
+            <div class="card-body">
+                <form asp-action="Decide" method="post">
+                    <input type="hidden" name="ApprovalId" value="@Model.ApprovalId" />
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" name="DocumentsVerified" value="true" id="docsVerified" />
+                        <label class="form-check-label required-asterisk" for="docsVerified">
+                            I have verified the supporting documents for this registration
+                        </label>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Rejection Reason <span class="text-muted">(required if rejecting)</span></label>
+                        <textarea name="RejectionReason" class="form-control" rows="2"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Review Notes</label>
+                        <textarea name="ReviewNotes" class="form-control" rows="2"></textarea>
+                    </div>
+                    <button type="submit" name="Approve" value="true" class="btn btn-navy" data-confirm="Approve this weapon registration?">
+                        <i class="bi bi-check2-circle me-1"></i> Approve
+                    </button>
+                    <button type="submit" name="Approve" value="false" class="btn btn-outline-danger" data-confirm="Reject this weapon registration?">
+                        <i class="bi bi-x-circle me-1"></i> Reject
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

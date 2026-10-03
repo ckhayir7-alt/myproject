@@ -1,0 +1,72 @@
+@model List<WRMS.Application.DTOs.Notifications.NotificationDto>
+@{
+    ViewData["Title"] = "Notifications";
+
+    (string Icon, string Accent) IconFor(WRMS.Domain.Enums.NotificationType type) => type switch
+    {
+        WRMS.Domain.Enums.NotificationType.LicenseExpiry => ("bi-calendar-x", "warning"),
+        WRMS.Domain.Enums.NotificationType.PendingApproval => ("bi-hourglass-split", "warning"),
+        WRMS.Domain.Enums.NotificationType.RegistrationStatusUpdate => ("bi-arrow-repeat", "info"),
+        WRMS.Domain.Enums.NotificationType.TransferRequest => ("bi-arrow-left-right", "info"),
+        WRMS.Domain.Enums.NotificationType.AdminAlert => ("bi-exclamation-triangle", "danger"),
+        _ => ("bi-bell", "info")
+    };
+}
+
+<div class="page-header">
+    <div>
+        <div class="page-eyebrow">Insights</div>
+        <h1 class="page-heading">Notifications</h1>
+        <p class="page-subtitle">License expiry, approval, and system alerts relevant to your role.</p>
+    </div>
+    @if (Model.Any(n => !n.IsRead))
+    {
+        <form asp-action="MarkAllRead" method="post">
+            <button type="submit" class="btn btn-outline-secondary btn-sm"><i class="bi bi-check2-all me-1"></i>Mark all as read</button>
+        </form>
+    }
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        @if (Model.Count == 0)
+        {
+            <partial name="_EmptyState" model="@(new WRMS.Web.Models.Shared.EmptyStateViewModel {
+                Icon = "bi-bell",
+                Title = "No notifications",
+                Message = "You're all caught up. New alerts about approvals, licenses, and registrations will appear here."
+            })" />
+        }
+        else
+        {
+            <ul class="list-group list-group-flush">
+                @foreach (var n in Model)
+                {
+                    var (icon, accent) = IconFor(n.Type);
+                    <li class="list-group-item d-flex gap-3 align-items-start @(n.IsRead ? "" : "bg-light")">
+                        <div class="stat-icon flex-shrink-0 accent-@accent" style="width:38px;height:38px;font-size:1rem;">
+                            <i class="bi @icon"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold d-flex align-items-center gap-2">
+                                @n.Title
+                                @if (!n.IsRead)
+                                {
+                                    <span class="badge bg-primary">New</span>
+                                }
+                            </div>
+                            <div class="small text-muted">@n.Message</div>
+                            <div class="small text-muted mt-1"><i class="bi bi-clock me-1"></i>@n.CreatedAt.ToString("yyyy-MM-dd HH:mm")</div>
+                        </div>
+                        @if (!n.IsRead)
+                        {
+                            <form asp-action="MarkRead" asp-route-id="@n.Id" method="post" class="flex-shrink-0">
+                                <button type="submit" class="btn btn-sm btn-outline-secondary">Mark read</button>
+                            </form>
+                        }
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+</div>

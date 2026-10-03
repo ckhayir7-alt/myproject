@@ -1,0 +1,73 @@
+@model List<WRMS.Application.DTOs.Approvals.PendingApprovalListItemDto>
+@{
+    ViewData["Title"] = "Approval Queue";
+}
+
+<div class="page-header">
+    <div>
+        <div class="page-eyebrow">Workflow</div>
+        <h1 class="page-heading">
+            Registration Approval Queue
+            @if (Model.Count > 0)
+            {
+                <span class="status-badge status-pending align-middle ms-2">@Model.Count requires review</span>
+            }
+        </h1>
+        <p class="page-subtitle">Weapon registrations awaiting officer review.</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        @if (Model.Count == 0)
+        {
+            <partial name="_EmptyState" model="@(new WRMS.Web.Models.Shared.EmptyStateViewModel {
+                Icon = "bi-check2-circle",
+                Title = "No pending registrations",
+                Message = "All weapon registration submissions have been reviewed. You're all caught up."
+            })" />
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle" id="approvalsTable">
+                    <thead>
+                        <tr>
+                            <th>Registration ID</th>
+                            <th>Weapon</th>
+                            <th>Owner</th>
+                            <th>Submitted</th>
+                            <th>Submitted By</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var a in Model)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@a.RegistrationId</td>
+                                <td>@a.Manufacturer @a.Model</td>
+                                <td>@a.OwnerName</td>
+                                <td>@a.SubmittedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td>@(a.SubmittedByName ?? "-")</td>
+                                <td class="text-end">
+                                    <a asp-action="Review" asp-route-id="@a.ApprovalId" class="btn btn-sm btn-navy">Review</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            if ($('#approvalsTable').length) {
+                $('#approvalsTable').DataTable({ order: [[3, 'asc']], pageLength: 25 });
+            }
+        });
+    </script>
+}

@@ -1,0 +1,26 @@
+@model WRMS.Web.Models.Owners.OwnerFormViewModel
+@{
+    ViewData["Title"] = "Register Owner";
+}
+
+<div class="page-header">
+    <div>
+        <div class="page-eyebrow">Registry</div>
+        <h1 class="page-heading">Register New Owner</h1>
+        <p class="page-subtitle">Enter the owner's personal and contact information.</p>
+    </div>
+</div>
+
+<div asp-validation-summary="ModelOnly" class="text-danger small mb-2"></div>
+
+<form asp-action="Create" method="post" novalidate>
+    <partial name="_Form" />
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-navy"><i class="bi bi-check2 me-1"></i> Register Owner</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

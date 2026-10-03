@@ -1,0 +1,68 @@
+@model WRMS.Web.Models.Account.ProfileViewModel
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="page-header">
+    <div>
+        <div class="page-eyebrow">Account</div>
+        <h1 class="page-heading">My Profile</h1>
+        <p class="page-subtitle">Manage your profile picture and view your account details.</p>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-header d-flex align-items-center gap-2"><i class="bi bi-person-circle text-muted"></i> Profile Picture</div>
+            <div class="card-body text-center">
+                @if (Model.HasProfilePicture)
+                {
+                    <img src="@Url.Action("ProfilePicture")" alt="Profile picture" class="profile-picture-lg mb-3" />
+                }
+                else
+                {
+                    <div class="profile-picture-lg profile-picture-placeholder mb-3 mx-auto">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                }
+
+                <form asp-action="UploadProfilePicture" method="post" enctype="multipart/form-data" class="mb-2">
+                    <div class="mb-2 text-start">
+                        <input type="file" name="file" class="form-control" accept=".jpg,.jpeg,.png" required />
+                        <div class="form-text">JPG or PNG, up to 2 MB.</div>
+                    </div>
+                    <button type="submit" class="btn btn-navy w-100"><i class="bi bi-upload me-1"></i> Upload New Picture</button>
+                </form>
+
+                @if (Model.HasProfilePicture)
+                {
+                    <form asp-action="RemoveProfilePicture" method="post" data-confirm="Remove your profile picture?">
+                        <button type="submit" class="btn btn-outline-danger w-100"><i class="bi bi-trash me-1"></i> Remove Picture</button>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header d-flex align-items-center gap-2"><i class="bi bi-info-circle text-muted"></i> Account Details</div>
+            <div class="card-body small">
+                <dl class="row mb-0">
+                    <dt class="col-4">Full Name</dt><dd class="col-8">@Model.FullName</dd>
+                    <dt class="col-4">Email</dt><dd class="col-8">@Model.Email</dd>
+                    <dt class="col-4">Roles</dt>
+                    <dd class="col-8">
+                        @foreach (var role in Model.Roles)
+                        {
+                            <span class="status-badge status-info me-1">@role</span>
+                        }
+                    </dd>
+                </dl>
+                <hr />
+                <a asp-action="ChangePassword" class="btn btn-outline-secondary btn-sm"><i class="bi bi-key me-1"></i> Change Password</a>
+            </div>
+        </div>
+    </div>
+</div>

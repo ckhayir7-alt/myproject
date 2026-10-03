@@ -1,0 +1,64 @@
+@model WRMS.Application.DTOs.Search.VerificationResultDto
+@{
+    ViewData["Title"] = "Verification Result";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3 no-print">
+    <h5 class="mb-0">Official Verification Result</h5>
+    <button type="button" class="btn btn-navy" onclick="window.print()"><i class="bi bi-printer me-1"></i> Print</button>
+</div>
+
+<div class="verify-document">
+    <div class="verify-header">
+        <h4><i class="bi bi-shield-check me-1"></i> Weapon Registration Verification</h4>
+        <p class="text-muted small mb-0">Weapon Registration &amp; Management System &mdash; Official Record</p>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <h6 class="text-uppercase small text-muted">Weapon</h6>
+            <dl class="row small">
+                <dt class="col-5">Registration ID</dt><dd class="col-7">@Model.RegistrationId</dd>
+                <dt class="col-5">Category</dt><dd class="col-7">@Model.CategoryName</dd>
+                <dt class="col-5">Manufacturer</dt><dd class="col-7">@Model.Manufacturer</dd>
+                <dt class="col-5">Model</dt><dd class="col-7">@Model.Model</dd>
+                <dt class="col-5">Serial Number</dt><dd class="col-7">@Model.SerialNumber</dd>
+                <dt class="col-5">Caliber</dt><dd class="col-7">@Model.Caliber</dd>
+                <dt class="col-5">Registered On</dt><dd class="col-7">@Model.RegistrationDate.ToString("yyyy-MM-dd")</dd>
+                <dt class="col-5">Registration Status</dt>
+                <dd class="col-7"><span class="status-badge status-@Model.WeaponStatus.ToString().ToLowerInvariant()">@Model.WeaponStatus</span></dd>
+            </dl>
+        </div>
+        <div class="col-md-6">
+            <h6 class="text-uppercase small text-muted">Owner</h6>
+            <dl class="row small">
+                <dt class="col-5">Full Name</dt><dd class="col-7">@Model.OwnerName</dd>
+                <dt class="col-5">Owner Code</dt><dd class="col-7">@Model.OwnerCode</dd>
+                <dt class="col-5">National ID</dt><dd class="col-7">@Model.OwnerNationalId</dd>
+                <dt class="col-5">Owner Status</dt>
+                <dd class="col-7"><span class="status-badge status-@Model.OwnerStatus.ToString().ToLowerInvariant()">@Model.OwnerStatus</span></dd>
+            </dl>
+
+            <h6 class="text-uppercase small text-muted mt-3">License</h6>
+            @if (Model.LicenseNumber is null)
+            {
+                <p class="small text-muted">No license on record for this weapon.</p>
+            }
+            else
+            {
+                <dl class="row small">
+                    <dt class="col-5">License Number</dt><dd class="col-7">@Model.LicenseNumber</dd>
+                    <dt class="col-5">Expires</dt><dd class="col-7">@Model.LicenseExpiryDate?.ToString("yyyy-MM-dd")</dd>
+                    <dt class="col-5">License Status</dt>
+                    <dd class="col-7"><span class="status-badge status-@Model.LicenseStatus.ToString()!.ToLowerInvariant()">@Model.LicenseStatus</span></dd>
+                </dl>
+            }
+        </div>
+    </div>
+
+    <hr />
+    <p class="small text-muted mb-0">
+        Verified by <strong>@Model.VerifiedByName</strong> on @Model.VerifiedAtUtc.ToString("yyyy-MM-dd HH:mm") UTC.
+        This result reflects the system record at the time of verification and is intended for authorized regulatory and law-enforcement use only.
+    </p>
+</div>

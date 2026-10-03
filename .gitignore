@@ -1,0 +1,21 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+
+## Logs
+Logs/
+src/WRMS.Web/Logs/
+
+## Uploaded documents (local dev storage)
+src/WRMS.Web/App_Data/Uploads/
+
+## IDE
+.vs/
+.vscode/
+*.swp
+
+## OS
+.DS_Store
+Thumbs.db

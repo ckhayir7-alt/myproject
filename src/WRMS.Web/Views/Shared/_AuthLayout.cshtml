@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Weapon Registration &amp; Management System</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="auth-shell">
+        <div class="auth-brand-panel">
+            <div class="brand-badge"><i class="bi bi-shield-lock-fill"></i></div>
+            <h2>Weapon Registration &amp; Management System</h2>
+            <p class="lead">The centralized platform for registration, licensing, and regulatory oversight of legally held firearms &mdash; built for authorized government and law-enforcement use.</p>
+            <div class="auth-feature-list">
+                <div class="feature-row">
+                    <div class="feature-icon"><i class="bi bi-journal-check"></i></div>
+                    <div class="feature-text">End-to-end registration &amp; licensing workflow</div>
+                </div>
+                <div class="feature-row">
+                    <div class="feature-icon"><i class="bi bi-people-fill"></i></div>
+                    <div class="feature-text">Role-based access for Admins, Officers &amp; Staff</div>
+                </div>
+                <div class="feature-row">
+                    <div class="feature-icon"><i class="bi bi-clock-history"></i></div>
+                    <div class="feature-text">Full audit trail on every record and decision</div>
+                </div>
+                <div class="feature-row">
+                    <div class="feature-icon"><i class="bi bi-file-earmark-bar-graph"></i></div>
+                    <div class="feature-text">Reporting &amp; export for compliance reviews</div>
+                </div>
+            </div>
+        </div>
+        <div class="auth-form-panel">
+            <div>
+                <div class="auth-card">
+                    @RenderBody()
+                </div>
+                <p class="auth-security-note">
+                    <i class="bi bi-lock-fill"></i> Authorized access only &mdash; all sign-in activity is logged and monitored.
+                </p>
+            </div>
+        </div>
+    </div>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
