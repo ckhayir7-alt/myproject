@@ -469,7 +469,7 @@ namespace WRMS.Infrastructure.Persistence.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Documents", x => x.Id);
-                    table.CheckConstraint("CK_Documents_SingleOwnerLink", "(CASE WHEN WeaponId IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN OwnerId IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN WeaponTransferId IS NOT NULL THEN 1 ELSE 0 END) = 1");
+                    table.CheckConstraint("CK_Documents_SingleOwnerLink", "(CASE WHEN \"WeaponId\" IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN \"OwnerId\" IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN \"WeaponTransferId\" IS NOT NULL THEN 1 ELSE 0 END) = 1");
                     table.ForeignKey(
                         name: "FK_Documents_Owners_OwnerId",
                         column: x => x.OwnerId,
