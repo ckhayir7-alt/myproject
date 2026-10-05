@@ -85,17 +85,19 @@ Neon for the database.
 2. In Railway, deploy the GitHub repository `ckhayir7-alt/myproject`. Leave the
    service root directory at the repository root so Railway can find `Dockerfile`
    and `WRMS.sln`.
-3. In the Railway service's **Variables**, configure:
+3. In the Railway service's **Settings** under **Source**, enable auto-deploy for
+   the `main` branch so pushed fixes are deployed automatically.
+4. In the Railway service's **Variables**, configure:
    - `ConnectionStrings__DefaultConnection`: the PostgreSQL connection URL or
      Npgsql connection string. PostgreSQL URLs are normalized to require SSL.
    - `SeedAdmin__Email`: the initial administrator's email address.
    - `SeedAdmin__Password`: a unique, strong password that meets the app's
      password policy (10+ characters, uppercase, lowercase, digit, and symbol).
    Railway supplies `PORT`; the container listens on that port automatically.
-4. Allow connections from Railway in your database provider's network settings.
+5. Allow connections from Railway in your database provider's network settings.
    The configured database user must be able to create and alter tables because
    EF Core migrations run automatically when the app starts.
-5. Generate a public domain for the Railway service and open it over HTTPS.
+6. Generate a public domain for the Railway service and open it over HTTPS.
 
 Do not commit database credentials or the administrator password to Git. Configure
 them as Railway variables. Uploaded documents are stored in
