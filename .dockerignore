@@ -1,0 +1,7 @@
+.git
+.claude
+.vs
+**/bin
+**/obj
+**/Logs
+**/App_Data/Uploads

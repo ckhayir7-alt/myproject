@@ -33,7 +33,7 @@ src/
 ## Prerequisites
 
 - .NET 8 SDK
-- SQL Server (LocalDB, Express, or full SQL Server) — connection string in `appsettings.json` targets `Server=.\SQLEXPRESS` by default
+- SQL Server (LocalDB, Express, or full SQL Server) — connection string in `appsettings.json` targets `localhost` by default
 - `dotnet-ef` global tool for running migrations: `dotnet tool install --global dotnet-ef`
 
 ## First-Time Setup
@@ -73,6 +73,33 @@ it to source control:
 dotnet user-secrets set "SeedAdmin:Email" "admin@yourdomain.gov" --project src\WRMS.Web
 dotnet user-secrets set "SeedAdmin:Password" "Your-Strong-P@ssw0rd" --project src\WRMS.Web
 ```
+
+## Deploying to Railway
+
+The repository includes a root-level `Dockerfile` that builds and runs the web app
+on Railway. The application currently requires an externally hosted SQL Server; it
+does not use Railway's PostgreSQL service.
+
+1. In Railway, create a project and deploy the GitHub repository
+   `ckhayir7-alt/myproject`. Leave the service root directory at the repository
+   root so Railway can find `Dockerfile` and `WRMS.sln`.
+2. In the service's **Variables**, configure:
+   - `ConnectionStrings__DefaultConnection`: the connection string for your
+     externally hosted SQL Server.
+   - `SeedAdmin__Email`: the initial administrator's email address.
+   - `SeedAdmin__Password`: a unique, strong password that meets the app's
+     password policy (10+ characters, uppercase, lowercase, digit, and symbol).
+   Railway supplies `PORT`; the container listens on that port automatically.
+3. Ensure the SQL Server is reachable from Railway over the network and that the
+   configured database user can run EF Core migrations. Migrations run
+   automatically at application startup.
+4. Generate a public domain for the Railway service and open it over HTTPS.
+
+Do not commit database credentials or the administrator password to Git. Configure
+them as Railway variables. Uploaded documents are stored in
+`/app/App_Data/Uploads`; attach a Railway volume at that exact mount path if uploads
+must survive deployments and restarts. Without a persistent volume, uploaded files
+are ephemeral.
 
 ## Roles
 
