@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 using WRMS.Application.Interfaces;
 using WRMS.Infrastructure.BackgroundServices;
 using WRMS.Infrastructure.Identity;
@@ -18,7 +19,8 @@ public static class DependencyInjection
             ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
 
         services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlServer(connectionString, sql => sql.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
+            options.UseNpgsql(NormalizePostgresConnectionString(connectionString), npgsql =>
+                npgsql.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
 
         services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
             {
@@ -60,5 +62,37 @@ public static class DependencyInjection
         services.AddHostedService<ExpiryAlertBackgroundService>();
 
         return services;
+    }
+
+    private static string NormalizePostgresConnectionString(string connectionString)
+    {
+        if (!Uri.TryCreate(connectionString, UriKind.Absolute, out var uri) ||
+            (uri.Scheme != "postgres" && uri.Scheme != "postgresql"))
+        {
+            return connectionString;
+        }
+
+        var credentials = uri.UserInfo.Split(':', 2);
+        var database = Uri.UnescapeDataString(uri.AbsolutePath.Trim('/'));
+        if (credentials.Length != 2 || string.IsNullOrWhiteSpace(database))
+        {
+            throw new InvalidOperationException(
+                "Connection string 'DefaultConnection' must include a PostgreSQL username, password, and database.");
+        }
+
+        var requireChannelBinding = uri.Query
+            .Split('&', StringSplitOptions.RemoveEmptyEntries)
+            .Any(parameter => parameter.Equals("channel_binding=require", StringComparison.OrdinalIgnoreCase));
+
+        return new NpgsqlConnectionStringBuilder
+        {
+            Host = uri.Host,
+            Port = uri.IsDefaultPort ? 5432 : uri.Port,
+            Database = database,
+            Username = Uri.UnescapeDataString(credentials[0]),
+            Password = Uri.UnescapeDataString(credentials[1]),
+            SslMode = SslMode.Require,
+            ChannelBinding = requireChannelBinding ? ChannelBinding.Require : ChannelBinding.Prefer
+        }.ConnectionString;
     }
 }
