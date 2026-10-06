@@ -11,7 +11,7 @@ tactical use, or operational deployment.
 ## Tech Stack
 
 - **.NET 8** / ASP.NET Core MVC
-- **Entity Framework Core 8** + **PostgreSQL**
+- **Entity Framework Core 8** + **SQL Server**
 - **ASP.NET Core Identity** (role-based access: Admin, Officer, AuthorizedStaff)
 - **Bootstrap 5**, Bootstrap Icons, Chart.js, DataTables.net (all vendored locally — no CDN dependency)
 - **FluentValidation**, **AutoMapper**
@@ -33,7 +33,7 @@ src/
 ## Prerequisites
 
 - .NET 8 SDK
-- PostgreSQL — connection string in `appsettings.json` targets a local PostgreSQL server by default
+- SQL Server (LocalDB, Express, or full SQL Server) — connection string in `appsettings.json` targets `localhost` by default
 - `dotnet-ef` 8.0.29 global tool for running migrations: `dotnet tool install --global dotnet-ef --version 8.0.29`
 
 ## First-Time Setup
@@ -77,37 +77,36 @@ dotnet user-secrets set "SeedAdmin:Password" "Your-Strong-P@ssw0rd" --project sr
 ## Deploying to Railway
 
 The repository includes a root-level `Dockerfile` that builds and runs the web app
-on Railway. This app uses PostgreSQL; use a managed PostgreSQL provider such as
-Neon for the database.
+on Railway. The application requires SQL Server; it does not use Railway's
+PostgreSQL service. Railway has no managed SQL Server, so either run one as a
+second service in the same project from the Docker image
+`mcr.microsoft.com/mssql/server:2022-latest` (variables `ACCEPT_EULA=Y` and
+`MSSQL_SA_PASSWORD`, a volume mounted at `/var/opt/mssql`, at least 2 GB of
+memory) or use an externally hosted SQL Server such as Azure SQL.
 
-1. Create a PostgreSQL project with your database provider and copy its PostgreSQL
-   connection URL (`postgresql://...`) or Npgsql connection string.
-2. In Railway, deploy the GitHub repository `ckhayir7-alt/myproject`. Leave the
-   service root directory at the repository root so Railway can find `Dockerfile`
-   and `WRMS.sln`.
-3. In the Railway service's **Settings** under **Source**, enable auto-deploy for
-   the `main` branch so pushed fixes are deployed automatically.
-4. In the Railway service's **Variables**, configure:
-   - `ConnectionStrings__DefaultConnection`: the PostgreSQL connection URL or
-     Npgsql connection string. PostgreSQL URLs are normalized to require SSL.
+1. In Railway, create a project and deploy the GitHub repository
+   `ckhayir7-alt/myproject`. Leave the service root directory at the repository
+   root so Railway can find `Dockerfile` and `WRMS.sln`. In the service's
+   **Settings** under **Source**, enable auto-deploy for the `main` branch so
+   pushed fixes are deployed automatically.
+2. In the service's **Variables**, configure:
+   - `ConnectionStrings__DefaultConnection`: the SQL Server connection string. For a
+     SQL Server service in the same Railway project, use its private hostname:
+     `Server=<service>.railway.internal,1433;Database=WRMS;User Id=sa;Password=<password>;TrustServerCertificate=True;MultipleActiveResultSets=true`
    - `SeedAdmin__Email`: the initial administrator's email address.
    - `SeedAdmin__Password`: a unique, strong password that meets the app's
      password policy (10+ characters, uppercase, lowercase, digit, and symbol).
    Railway supplies `PORT`; the container listens on that port automatically.
-5. Allow connections from Railway in your database provider's network settings.
-   The configured database user must be able to create and alter tables because
-   EF Core migrations run automatically when the app starts.
-6. Generate a public domain for the Railway service and open it over HTTPS.
+3. Ensure the SQL Server is reachable from Railway over the network and that the
+   configured database user can run EF Core migrations. Migrations run
+   automatically at application startup.
+4. Generate a public domain for the Railway service and open it over HTTPS.
 
 Do not commit database credentials or the administrator password to Git. Configure
 them as Railway variables. Uploaded documents are stored in
 `/app/App_Data/Uploads`; attach a Railway volume at that exact mount path if uploads
 must survive deployments and restarts. Without a persistent volume, uploaded files
 are ephemeral.
-
-The current PostgreSQL migration creates a fresh schema. Existing SQL Server data
-is not copied automatically; export and migrate any records you need before
-switching providers.
 
 ## Roles
 

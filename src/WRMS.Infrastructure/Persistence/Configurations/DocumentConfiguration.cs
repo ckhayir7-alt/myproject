@@ -33,8 +33,8 @@ public class DocumentConfiguration : IEntityTypeConfiguration<Document>
 
         builder.ToTable(t => t.HasCheckConstraint(
             "CK_Documents_SingleOwnerLink",
-            "(CASE WHEN \"WeaponId\" IS NOT NULL THEN 1 ELSE 0 END + " +
-            "CASE WHEN \"OwnerId\" IS NOT NULL THEN 1 ELSE 0 END + " +
-            "CASE WHEN \"WeaponTransferId\" IS NOT NULL THEN 1 ELSE 0 END) = 1"));
+            "(CASE WHEN WeaponId IS NOT NULL THEN 1 ELSE 0 END + " +
+            "CASE WHEN OwnerId IS NOT NULL THEN 1 ELSE 0 END + " +
+            "CASE WHEN WeaponTransferId IS NOT NULL THEN 1 ELSE 0 END) = 1"));
     }
 }

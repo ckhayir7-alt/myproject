@@ -70,6 +70,7 @@ public class ApprovalService : IApprovalService
             Caliber = approval.Weapon.Caliber,
             RegistrationLocation = approval.Weapon.RegistrationLocation,
             Notes = approval.Weapon.Notes,
+            OwnerId = approval.Weapon.OwnerId,
             OwnerName = approval.Weapon.Owner.FullName,
             OwnerCode = approval.Weapon.Owner.OwnerCode,
             SubmittedAt = approval.SubmittedAt,

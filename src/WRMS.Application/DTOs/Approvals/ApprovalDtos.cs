@@ -32,6 +32,7 @@ public class ApprovalReviewDto
     public string Caliber { get; set; } = string.Empty;
     public string RegistrationLocation { get; set; } = string.Empty;
     public string? Notes { get; set; }
+    public Guid OwnerId { get; set; }
     public string OwnerName { get; set; } = string.Empty;
     public string OwnerCode { get; set; } = string.Empty;
     public DateTime SubmittedAt { get; set; }
