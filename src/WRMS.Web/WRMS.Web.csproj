@@ -20,6 +20,8 @@
   <ItemGroup>
     <ProjectReference Include="..\WRMS.Application\WRMS.Application.csproj" />
     <ProjectReference Include="..\WRMS.Infrastructure\WRMS.Infrastructure.csproj" />
+    <ProjectReference Include="..\WRMS.Migrations.SqlServer\WRMS.Migrations.SqlServer.csproj" />
+    <ProjectReference Include="..\WRMS.Migrations.PostgreSql\WRMS.Migrations.PostgreSql.csproj" />
   </ItemGroup>
 
 </Project>

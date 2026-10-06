@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WRMS.Domain.Common;
 using WRMS.Domain.Entities;
 using WRMS.Infrastructure.Identity;
@@ -23,11 +24,42 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<SystemSetting> SystemSettings => Set<SystemSetting>();
 
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        if (Database.IsNpgsql())
+        {
+            // PostgreSQL's "timestamp with time zone" only accepts UTC values, but dates bound
+            // from forms or built with DateTime.Today arrive as Unspecified/Local.
+            configurationBuilder.Properties<DateTime>().HaveConversion<UtcDateTimeConverter>();
+        }
+    }
+
+    private sealed class UtcDateTimeConverter : ValueConverter<DateTime, DateTime>
+    {
+        public UtcDateTimeConverter() : base(
+            value => value.Kind == DateTimeKind.Utc ? value
+                : value.Kind == DateTimeKind.Local ? value.ToUniversalTime()
+                : DateTime.SpecifyKind(value, DateTimeKind.Utc),
+            value => DateTime.SpecifyKind(value, DateTimeKind.Utc))
+        {
+        }
+    }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
 
         builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+
+        if (Database.IsNpgsql())
+        {
+            // PostgreSQL folds unquoted identifiers to lower case, so the column names must be quoted.
+            builder.Entity<Document>().ToTable(t => t.HasCheckConstraint(
+                "CK_Documents_SingleOwnerLink",
+                "(CASE WHEN \"WeaponId\" IS NOT NULL THEN 1 ELSE 0 END + " +
+                "CASE WHEN \"OwnerId\" IS NOT NULL THEN 1 ELSE 0 END + " +
+                "CASE WHEN \"WeaponTransferId\" IS NOT NULL THEN 1 ELSE 0 END) = 1"));
+        }
 
         // Rename default Identity tables to a consistent, professional schema.
         builder.Entity<ApplicationUser>().ToTable("Users");

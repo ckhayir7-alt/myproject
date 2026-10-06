@@ -11,7 +11,7 @@ tactical use, or operational deployment.
 ## Tech Stack
 
 - **.NET 8** / ASP.NET Core MVC
-- **Entity Framework Core 8** + **SQL Server**
+- **Entity Framework Core 8** + **SQL Server** or **PostgreSQL**
 - **ASP.NET Core Identity** (role-based access: Admin, Officer, AuthorizedStaff)
 - **Bootstrap 5**, Bootstrap Icons, Chart.js, DataTables.net (all vendored locally — no CDN dependency)
 - **FluentValidation**, **AutoMapper**
@@ -27,13 +27,15 @@ src/
   WRMS.Application     DTOs, service interfaces, FluentValidation validators
   WRMS.Infrastructure  EF Core DbContext, Identity, service implementations,
                         PDF/Excel export, background jobs
+  WRMS.Migrations.SqlServer   EF Core migrations for SQL Server
+  WRMS.Migrations.PostgreSql  EF Core migrations for PostgreSQL
   WRMS.Web             MVC controllers, Razor views, static assets
 ```
 
 ## Prerequisites
 
 - .NET 8 SDK
-- SQL Server (LocalDB, Express, or full SQL Server) — connection string in `appsettings.json` targets `localhost` by default
+- SQL Server (LocalDB, Express, or full SQL Server) — connection string in `appsettings.json` targets `localhost` by default — or PostgreSQL (see [Database providers](#database-providers))
 - `dotnet-ef` 8.0.29 global tool for running migrations: `dotnet tool install --global dotnet-ef --version 8.0.29`
 
 ## First-Time Setup
@@ -45,7 +47,7 @@ src/
    ```
 2. Apply the database migrations (also happens automatically on app startup):
    ```
-   dotnet ef database update --project src\WRMS.Infrastructure --startup-project src\WRMS.Web
+   dotnet ef database update --project src\WRMS.Migrations.SqlServer --startup-project src\WRMS.Web
    ```
 3. Run the app:
    ```
@@ -74,15 +76,36 @@ dotnet user-secrets set "SeedAdmin:Email" "admin@yourdomain.gov" --project src\W
 dotnet user-secrets set "SeedAdmin:Password" "Your-Strong-P@ssw0rd" --project src\WRMS.Web
 ```
 
+## Database providers
+
+The app runs on SQL Server or PostgreSQL. The provider is chosen from the
+`DefaultConnection` connection string: a `postgresql://` URL or an Npgsql string
+(`Host=...`) selects PostgreSQL, anything else selects SQL Server. Set
+`Database:Provider` to `SqlServer` or `PostgreSql` to choose explicitly.
+
+Each provider has its own migrations project. When the model changes, add a
+migration to both, pointing the connection string at the matching provider:
+
+```
+dotnet ef migrations add <Name> --project src\WRMS.Migrations.SqlServer --startup-project src\WRMS.Web
+$env:ConnectionStrings__DefaultConnection = "Host=localhost;Database=wrms;Username=postgres;Password=postgres"
+dotnet ef migrations add <Name> --project src\WRMS.Migrations.PostgreSql --startup-project src\WRMS.Web
+```
+
 ## Deploying to Railway
 
 The repository includes a root-level `Dockerfile` that builds and runs the web app
-on Railway. The application requires SQL Server; it does not use Railway's
-PostgreSQL service. Railway has no managed SQL Server, so either run one as a
-second service in the same project from the Docker image
-`mcr.microsoft.com/mssql/server:2022-latest` (variables `ACCEPT_EULA=Y` and
-`MSSQL_SA_PASSWORD`, a volume mounted at `/var/opt/mssql`, at least 2 GB of
-memory) or use an externally hosted SQL Server such as Azure SQL.
+on Railway. The app works with either database there:
+
+- **PostgreSQL** (simplest): use Railway's PostgreSQL service or a managed
+  provider such as Neon.
+- **SQL Server**: Railway has no managed SQL Server, so either run one as a
+  second service in the same project from the Docker image
+  `mcr.microsoft.com/mssql/server:2022-latest` (variables `ACCEPT_EULA=Y` and
+  `MSSQL_SA_PASSWORD`, a volume mounted at `/var/opt/mssql`, at least 2 GB of
+  memory) or use an externally hosted SQL Server such as Azure SQL.
+
+Data is not copied between providers; each one starts with its own fresh schema.
 
 1. In Railway, create a project and deploy the GitHub repository
    `ckhayir7-alt/myproject`. Leave the service root directory at the repository
@@ -90,15 +113,17 @@ memory) or use an externally hosted SQL Server such as Azure SQL.
    **Settings** under **Source**, enable auto-deploy for the `main` branch so
    pushed fixes are deployed automatically.
 2. In the service's **Variables**, configure:
-   - `ConnectionStrings__DefaultConnection`: the SQL Server connection string. For a
-     SQL Server service in the same Railway project, use its private hostname:
+   - `ConnectionStrings__DefaultConnection`: the database connection string. Use
+     the PostgreSQL URL (`postgresql://...`, normalized to require SSL) or an Npgsql
+     connection string for PostgreSQL. For a SQL Server service in the same Railway
+     project, use its private hostname:
      `Server=<service>.railway.internal,1433;Database=WRMS;User Id=sa;Password=<password>;TrustServerCertificate=True;MultipleActiveResultSets=true`
    - `SeedAdmin__Email`: the initial administrator's email address.
    - `SeedAdmin__Password`: a unique, strong password that meets the app's
      password policy (10+ characters, uppercase, lowercase, digit, and symbol).
    Railway supplies `PORT`; the container listens on that port automatically.
-3. Ensure the SQL Server is reachable from Railway over the network and that the
-   configured database user can run EF Core migrations. Migrations run
+3. Ensure the database is reachable from Railway over the network and that the
+   configured database user can create and alter tables. Migrations run
    automatically at application startup.
 4. Generate a public domain for the Railway service and open it over HTTPS.
 
